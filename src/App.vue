@@ -83,10 +83,13 @@
                 p Рабочее время: {{ time.toLocaleString('ru', format) }} {{ pluralize(time, 'час', 'часа', 'часов') }}
                   span(v-bind:class="{ 'difference--good': timeDif[0] === '-', 'difference--bad': timeDif[0] === '+' }").difference {{ timeDif }}
               div.parameter-line
-                p Cредний доход работника: {{ workerIncome.toLocaleString('ru', format) }} ₽
+                p Cтоимость, созданная работником: {{ work.toLocaleString('ru', format) }} ₽
+                  span(v-bind:class="{ 'difference--good': workDif[0] === '-', 'difference--bad': workDif[0] === '+' }").difference {{ workDif }}
+              div.parameter-line
+                p Доходы работника: {{ workerIncome.toLocaleString('ru', format) }} ₽
                   span(v-bind:class="{ 'difference--good': workerIncomeDif[0] === '+', 'difference--bad': workerIncomeDif[0] === '-' }").difference {{ workerIncomeDif }}
               div.parameter-line
-                p Реальное содержание дохода: {{ workerIncomeReal.toLocaleString('ru', format) }} {{ pluralize(workerIncomeReal, 'изделие', 'изделия', 'изделий') }}
+                p Реальное содержание доходов: {{ workerIncomeReal.toLocaleString('ru', format) }} {{ pluralize(workerIncomeReal, 'изделие', 'изделия', 'изделий') }}
                   span(v-bind:class="{ 'difference--good': workerIncomeRealDif[0] === '+', 'difference--bad': workerIncomeRealDif[0] === '-' }").difference {{ workerIncomeRealDif }}
 
 </template>
@@ -176,6 +179,9 @@ export default {
     workerIncomeRealDif() {
       return this.getDifference('workerIncomeReal');
     },
+    workDif() {
+      return this.getDifference('work');
+    },
     time() {
       return this.weeks * this.days * this.hours;
     },
@@ -217,6 +223,9 @@ export default {
     },
     organic() {
       return this.constant / this.variable;
+    },
+    work() {
+      return this.intensity * this.time;
     }
   },
   methods: {
@@ -253,6 +262,7 @@ export default {
         this.memory.time = this.time;
         this.memory.workerIncome = this.workerIncome;
         this.memory.workerIncomeReal = this.workerIncomeReal;
+        this.memory.work = this.work;
       } else {
         this.memory = null;
       }
@@ -336,7 +346,7 @@ export default {
     top -8px
 
   .result
-    padding-bottom 36px
+    min-height 120px
     background-size 120px 120px
     background-position top right
     background-repeat no-repeat
@@ -344,4 +354,7 @@ export default {
       background-image url('./assets/capitalist.png')
     &--worker
       background-image url('./assets/worker.png')
+
+  .result + .result
+    margin-top 36px
 </style>
