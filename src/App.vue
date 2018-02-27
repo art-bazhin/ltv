@@ -1,6 +1,6 @@
 <template lang="pug">
   div#app
-    h1 Калькулятор трудовой теории стоимости
+    h1 Калькулятор по трудовой теории стоимости
     div.container
       el-row(type="flex", :gutter="20")
         el-col(:span="10")
@@ -10,35 +10,35 @@
             div.parameter-line
               p.parameter-name Период в неделях:
               el-input-number(size="mini" v-model="weeks" v-bind:min="1")
-              span.difference {{ weeksDif }}
+              span(v-bind:class="{ 'difference--change': weeksDif[0] === '-' || weeksDif[0] === '+' }").difference {{ weeksDif }}
             div.parameter-line
               p.parameter-name Рабочих дней в неделю:
               el-input-number(size="mini" v-model="days" v-bind:min="1" v-bind:max="7")
-              span.difference {{ daysDif }}
+              span(v-bind:class="{ 'difference--change': daysDif[0] === '-' || daysDif[0] === '+' }").difference {{ daysDif }}
             div.parameter-line
               p.parameter-name Рабочих часов в день:
               el-input-number(size="mini" v-model="hours" v-bind:min="1" v-bind:max="24")
-              span.difference {{ hoursDif }}
+              span(v-bind:class="{ 'difference--change': hoursDif[0] === '-' || hoursDif[0] === '+' }").difference {{ hoursDif }}
             div.parameter-line
               p.parameter-name Количество работников:
               el-input-number(size="mini" v-model="workers" v-bind:min="1")
-              span.difference {{ workersDif }}
+              span(v-bind:class="{ 'difference--change': workersDif[0] === '-' || workersDif[0] === '+' }").difference {{ workersDif }}
             div.parameter-line
               p.parameter-name Средняя производительность труда работника (изделий/час):
               el-input-number(size="mini" v-model="productivity" v-bind:min="1")
-              span.difference {{ productivityDif }}
+              span(v-bind:class="{ 'difference--change': productivityDif[0] === '-' || productivityDif[0] === '+' }").difference {{ productivityDif }}
             div.parameter-line
-              p.parameter-name Издержки постоянного капитала на изделие в рублях:
+              p.parameter-name Издержки постоянного капитала на изделие (₽):
               el-input-number(size="mini" v-model="constantPerProduct" v-bind:min="1")
-              span.difference {{ constantPerProductDif }}
+              span(v-bind:class="{ 'difference--change': constantPerProductDif[0] === '-' || constantPerProductDif[0] === '+' }").difference {{ constantPerProductDif }}
             div.parameter-line
               p.parameter-name Средняя зарплата работника (₽/час):
               el-input-number(size="mini" v-model="salary" v-bind:min="1")
-              span.difference {{ salaryDif }}
+              span(v-bind:class="{ 'difference--change': salaryDif[0] === '-' || salaryDif[0] === '+' }").difference {{ salaryDif }}
             div.parameter-line
               p.parameter-name Средняя интенсивность труда работника (₽/час):
               el-input-number(size="mini" v-model="intensity" v-bind:min="1")
-              span.difference {{ intensityDif }}
+              span(v-bind:class="{ 'difference--change': intensityDif[0] === '-' || intensityDif[0] === '+' }").difference {{ intensityDif }}
         el-col(:span="14")
           el-card
             div(slot="header").button-header
@@ -80,7 +80,7 @@
                   span(v-bind:class="{ 'difference--good': returnRateDif[0] === '+', 'difference--bad': returnRateDif[0] === '-' }").difference {{ returnRateDif }}
             div.result.result--worker
               div.parameter-line.parameter-line
-                p Cредняя выработка работника: {{ time.toLocaleString('ru', format) }} {{ pluralize(time, 'час', 'часа', 'часов') }}
+                p Рабочее время: {{ time.toLocaleString('ru', format) }} {{ pluralize(time, 'час', 'часа', 'часов') }}
                   span(v-bind:class="{ 'difference--good': timeDif[0] === '-', 'difference--bad': timeDif[0] === '+' }").difference {{ timeDif }}
               div.parameter-line
                 p Cредний доход работника: {{ workerIncome.toLocaleString('ru', format) }} ₽
@@ -292,6 +292,7 @@ export default {
   h1
     font-size 20px
     line-height 32px
+    margin-top 16px
     margin-bottom 24px
     text-align center
 
@@ -322,6 +323,9 @@ export default {
 
   .difference--bad
     color #F56C6C
+
+  .difference--change
+    color #E6A23C
 
   .button-header
     position relative
