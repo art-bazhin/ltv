@@ -25,11 +25,11 @@
               span(v-bind:class="{ 'difference--change': workersDif[0] === '-' || workersDif[0] === '+' }").difference {{ workersDif }}
             div.parameter-line
               p.parameter-name Средняя производительность труда работника (изделий/час):
-              el-input-number(size="mini" v-model="productivity" v-bind:min="1")
+              el-input-number(size="mini" v-model="productivity" v-bind:min="0.0001")
               span(v-bind:class="{ 'difference--change': productivityDif[0] === '-' || productivityDif[0] === '+' }").difference {{ productivityDif }}
             div.parameter-line
               p.parameter-name Издержки постоянного капитала на изделие (₽):
-              el-input-number(size="mini" v-model="constantPerProduct" v-bind:min="1")
+              el-input-number(size="mini" v-model="constantPerProduct" v-bind:min="0")
               span(v-bind:class="{ 'difference--change': constantPerProductDif[0] === '-' || constantPerProductDif[0] === '+' }").difference {{ constantPerProductDif }}
             div.parameter-line
               p.parameter-name Средняя зарплата работника (₽/час):
@@ -271,7 +271,7 @@ export default {
       let num = number % 10;
 
       if (num === 1) return first;
-      if (num > 0 && num % Math.floor(num) !== 0) return second;
+      if (num >= 0.005 && num % Math.floor(num) !== 0) return second;
       if (num > 1 && num < 5) return second;
       return third;
     }
