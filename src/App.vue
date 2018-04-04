@@ -28,6 +28,10 @@
               el-input-number(size="mini" v-model="productivity" v-bind:min="0.0001")
               span(v-bind:class="{ 'difference--change': productivityDif[0] === '-' || productivityDif[0] === '+' }").difference {{ productivityDif }}
             div.parameter-line
+              p.parameter-name Реальная стоимость рабочей силы работника (изделий/час):
+              el-input-number(size="mini" v-model="workForce" v-bind:min="0.0001")
+              span(v-bind:class="{ 'difference--change': workForceDif[0] === '-' || workForceDif[0] === '+' }").difference {{ workForceDif }}
+            div.parameter-line
               p.parameter-name Издержки постоянного капитала на изделие (₽):
               el-input-number(size="mini" v-model="constantPerProduct" v-bind:min="0")
               span(v-bind:class="{ 'difference--change': constantPerProductDif[0] === '-' || constantPerProductDif[0] === '+' }").difference {{ constantPerProductDif }}
@@ -39,6 +43,10 @@
               p.parameter-name Средняя интенсивность труда работника (₽/час):
               el-input-number(size="mini" v-model="intensity" v-bind:min="1")
               span(v-bind:class="{ 'difference--change': intensityDif[0] === '-' || intensityDif[0] === '+' }").difference {{ intensityDif }}
+            div.parameter-line
+              p.parameter-name Общественная стоимость изделия (₽):
+              el-input-number(size="mini" v-model="value" v-bind:min="0.0001")
+              span(v-bind:class="{ 'difference--change': valueDif[0] === '-' || valueDif[0] === '+' }").difference {{ valueDif }}
         el-col(:span="14")
           el-card
             div(slot="header").button-header
@@ -51,9 +59,6 @@
               div.parameter-line
                 p Общая стоимость: {{ total.toLocaleString('ru', format) }} ₽
                   span(v-bind:class="{ 'difference--good': totalDif[0] === '+', 'difference--bad': totalDif[0] === '-' }").difference {{ totalDif }}
-              div.parameter-line
-                p Стоимость одного изделия: {{ price.toLocaleString('ru', format) }} ₽
-                  span(v-bind:class="{ 'difference--good': priceDif[0] === '-', 'difference--bad': priceDif[0] === '+' }").difference {{ priceDif }}
               div.parameter-line
                 p Издержки постоянного капитала: {{ constant.toLocaleString('ru', format) }} ₽
                   span(v-bind:class="{ 'difference--good': constantDif[0] === '-', 'difference--bad': constantDif[0] === '+' }").difference {{ constantDif }}
@@ -78,6 +83,9 @@
               div.parameter-line
                 p Норма прибыли: {{ returnRate.toLocaleString('ru', format) }}%
                   span(v-bind:class="{ 'difference--good': returnRateDif[0] === '+', 'difference--bad': returnRateDif[0] === '-' }").difference {{ returnRateDif }}
+              div.parameter-line
+                p Индивидуальная стоимость изделия: {{ price.toLocaleString('ru', format) }} ₽
+                  span(v-bind:class="{ 'difference--good': priceDif[0] === '-', 'difference--bad': priceDif[0] === '+' }").difference {{ priceDif }}
             div.result.result--worker
               div.parameter-line.parameter-line
                 p Рабочее время: {{ time.toLocaleString('ru', format) }} {{ pluralize(time, 'час', 'часа', 'часов') }}
@@ -91,6 +99,8 @@
               div.parameter-line
                 p Реальное содержание доходов: {{ workerIncomeReal.toLocaleString('ru', format) }} {{ pluralize(workerIncomeReal, 'изделие', 'изделия', 'изделий') }}
                   span(v-bind:class="{ 'difference--good': workerIncomeRealDif[0] === '+', 'difference--bad': workerIncomeRealDif[0] === '-' }").difference {{ workerIncomeRealDif }}
+              div.parameter-line
+                p То же в % от реальной стоимости рабочей силы: {{ workerIncomeRealPer.toLocaleString('ru', format) }}%
 
 </template>
 
@@ -103,11 +113,13 @@ export default {
       weeks: 4,
       days: 5,
       hours: 8,
-      constantPerProduct: 20,
+      constantPerProduct: 10,
       workers: 100,
-      salary: 100,
+      salary: 150,
       productivity: 10,
-      intensity: 200,
+      intensity: 300,
+      value: 40,
+      workForce: 3.75,
       memory: null,
       format: { maximumFractionDigits: 2 }
     };
@@ -182,6 +194,15 @@ export default {
     workDif() {
       return this.getDifference('work');
     },
+    workForceDif() {
+      return this.getDifference('workForce');
+    },
+    valueDif() {
+      return this.getDifference('value');
+    },
+    workerIncomeRealPerDif() {
+      return this.getDifference('workerIncomeRealPer');
+    },
     time() {
       return this.weeks * this.days * this.hours;
     },
@@ -198,16 +219,16 @@ export default {
       return this.constant + this.variable;
     },
     addedProduct() {
-      return this.added / this.price;
+      return this.added / this.value;
     },
     added() {
-      return this.time * this.workers * this.intensity - this.variable;
+      return this.total - this.costs;
     },
     total() {
-      return this.costs + this.added;
+      return this.count * this.value;
     },
     price() {
-      return this.total / this.count;
+      return (this.intensity * this.time * this.workers + this.constant) / this.count;
     },
     addedRate() {
       return 100 * this.added / this.variable;
@@ -219,13 +240,16 @@ export default {
       return this.time * this.salary;
     },
     workerIncomeReal() {
-      return this.workerIncome / this.price;
+      return this.workerIncome / this.value;
     },
     organic() {
       return this.constant / this.variable;
     },
     work() {
-      return this.intensity * this.time;
+      return this.added / this.workers;
+    },
+    workerIncomeRealPer() {
+      return 100 * this.workerIncomeReal / (this.time * this.workForce);
     }
   },
   methods: {
@@ -262,7 +286,10 @@ export default {
         this.memory.time = this.time;
         this.memory.workerIncome = this.workerIncome;
         this.memory.workerIncomeReal = this.workerIncomeReal;
+        this.memory.workerIncomeRealPer = this.workerIncomeRealPer;
         this.memory.work = this.work;
+        this.memory.workForce = this.workForce;
+        this.memory.value = this.value;
       } else {
         this.memory = null;
       }
